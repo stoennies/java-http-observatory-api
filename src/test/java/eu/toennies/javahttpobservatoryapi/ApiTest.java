@@ -1,5 +1,7 @@
 package eu.toennies.javahttpobservatoryapi;
 
+import static org.junit.Assert.*;
+
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -13,7 +15,7 @@ public class ApiTest {
 		Api api = new Api();
 		JSONObject gradeDistribution = api.fetchGradeDistribution();
 
-		ApiAssert.assertNotNull("JSONObject is null", gradeDistribution);
+		assertNotNull("JSONObject is null", gradeDistribution);
 		ApiAssert.assertApiDataFetched(gradeDistribution);
 	}
 
@@ -25,7 +27,7 @@ public class ApiTest {
 		Api api = new Api();
 		JSONObject scannerStates = api.fetchScannerStates();
 
-		ApiAssert.assertNotNull("JSONObject is null", scannerStates);
+		assertNotNull("JSONObject is null", scannerStates);
 		ApiAssert.assertApiDataFetched(scannerStates);
 	}
 }

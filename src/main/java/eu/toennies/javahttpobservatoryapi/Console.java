@@ -38,7 +38,7 @@ public class Console {
 	}
 
 	private static void retrieveAssessment(String[] args) {
-		String host = ConsoleUtilities.arrayValueMatchRegex(args, "-host=(.+)");;
+		String host = ConsoleUtilities.arrayValueMatchRegex(args, "-host=(.+)");
 		
 		Api obervatoryApi = new Api();
 
@@ -56,7 +56,7 @@ public class Console {
 	}
 
 	private static void retrieveResults(String[] args) {
-		String id = ConsoleUtilities.arrayValueMatchRegex(args, "-id=(.+)");;
+		String id = ConsoleUtilities.arrayValueMatchRegex(args, "-id=(.+)");
 		
 		Api obervatoryApi = new Api();
 
