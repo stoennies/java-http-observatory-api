@@ -1,9 +1,12 @@
 language: java
-
-jdk:
-  - openjdk7
-  - oraclejdk7
-  - oraclejdk8
-
-notifications:
-    email: false
+sudo: false
+install: mvn install -DskipFindBugs=true -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script: mvn clean verify -Dmaven.javadoc.skip=true
+cache:
+  directories:
+  - $HOME/.m2
+# whitelist
+branches:
+  only:
+    - master
+- stable
