@@ -25,7 +25,7 @@ public class ConsoleUtilities
 	public static Map<String, Object> jsonToMap(JSONObject json) throws JSONException {
 	    Map<String, Object> retMap = new HashMap<String, Object>();
 
-	    if(json != JSONObject.NULL) {
+	    if(json != null) {
 	        retMap = toMap(json);
 	    }
 	    return retMap;
@@ -71,15 +71,17 @@ public class ConsoleUtilities
 	
 	public static String mapToConsoleOutput(Map<String, Object> map)
 	{
-		String consoleOutput = "";
+		StringBuffer consoleOutput = new StringBuffer();
 		
 		for(Map.Entry<String, Object> entry : map.entrySet())
 		{
-			consoleOutput += entry.getKey() + " = " + entry.getValue().toString();
-			consoleOutput += newLine;
+			consoleOutput.append(entry.getKey());
+			consoleOutput.append(" = ");
+			consoleOutput.append(entry.getValue().toString());
+			consoleOutput.append(newLine);
 		}
 		
-		return (consoleOutput);
+		return consoleOutput.toString();
 	}
 	
 	public static String arrayValueMatchRegex(String[] array, String regex)

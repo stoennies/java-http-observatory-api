@@ -7,9 +7,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -52,7 +54,10 @@ public class Api {
 		try {
 			jsonString = sendApiGetRequest(ApiCommands.SCANNER_STATES.apiCommand(), null);
 			json = new JSONObject(jsonString);
-		} catch (Exception ignored) {
+		} catch (IOException ignored) {
+			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
+		} catch (JSONException e) {
+			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
 		return (json);
@@ -74,7 +79,10 @@ public class Api {
 		try {
 			jsonString = sendApiGetRequest(ApiCommands.SCANNER_STATES.apiCommand(), null);
 			json = new JSONObject(jsonString);
-		} catch (Exception ignored) {
+		} catch (IOException ignored) {
+			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
+		} catch (JSONException e) {
+			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
 		return (json);
@@ -112,7 +120,10 @@ public class Api {
 
 			jsonString = sendApiGetRequest(ApiCommands.RECENT_SCANS.apiCommand(), parameters);
 			json = new JSONObject(jsonString);
-		} catch (Exception ignored) {
+		} catch (IOException ignored) {
+			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
+		} catch (JSONException e) {
+			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
 		return (json);
@@ -143,7 +154,10 @@ public class Api {
 
 			jsonString = sendApiGetRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand(), parameters);
 			json = new JSONObject(jsonString);
-		} catch (Exception ignored) {
+		} catch (IOException ignored) {
+			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
+		} catch (JSONException e) {
+			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
 		return (json);
@@ -160,7 +174,10 @@ public class Api {
 
 			jsonString = sendApiPostRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand()+"?host="+hostname, parameters);
 			json = new JSONObject(jsonString);
-		} catch (Exception ignored) {
+		} catch (IOException ignored) {
+			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
+		} catch (JSONException e) {
+			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
 		return (json);
@@ -185,7 +202,10 @@ public class Api {
 
 			jsonString = sendApiGetRequest(ApiCommands.RETRIEVE_TEST_RESULT.apiCommand(), parameters);
 			json = new JSONObject(jsonString);
-		} catch (Exception ignored) {
+		} catch (IOException ignored) {
+			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
+		} catch (JSONException e) {
+			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
 		return (json);
@@ -281,19 +301,21 @@ public class Api {
 	 * @return String
 	 */
 	private String buildGetParameterString(Map<String, String> parameters) {
-		String getParameterString = "";
+		StringBuffer getParameterString = new StringBuffer();
 
+		
 		for (Map.Entry<String, String> param : parameters.entrySet()) {
 			if (param.getValue() == null) {
 				continue;
 			}
 
-			getParameterString += (getParameterString.length() < 1) ? ("?") : ("&");
-
-			getParameterString += param.getKey() + "=" + param.getValue();
+			getParameterString.append((getParameterString.length() < 1) ? ("?") : ("&"));
+			getParameterString.append(param.getKey());
+			getParameterString.append("=");
+			getParameterString.append(param.getValue());
 		}
 
-		return (getParameterString);
+		return getParameterString.toString();
 	}
 
 }
