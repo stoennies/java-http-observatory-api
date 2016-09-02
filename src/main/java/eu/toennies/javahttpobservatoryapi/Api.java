@@ -1,10 +1,14 @@
 package eu.toennies.javahttpobservatoryapi;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONObject;
 
@@ -46,7 +50,7 @@ public class Api {
 		JSONObject json = new JSONObject();
 
 		try {
-			jsonString = sendApiRequest(ApiCommands.SCANNER_STATES.apiCommand(), null);
+			jsonString = sendApiGetRequest(ApiCommands.SCANNER_STATES.apiCommand(), null);
 			json = new JSONObject(jsonString);
 		} catch (Exception ignored) {
 		}
@@ -68,7 +72,7 @@ public class Api {
 		JSONObject json = new JSONObject();
 
 		try {
-			jsonString = sendApiRequest(ApiCommands.SCANNER_STATES.apiCommand(), null);
+			jsonString = sendApiGetRequest(ApiCommands.SCANNER_STATES.apiCommand(), null);
 			json = new JSONObject(jsonString);
 		} catch (Exception ignored) {
 		}
@@ -106,7 +110,7 @@ public class Api {
 			parameters.put("max", max);
 			parameters.put("min", min);
 
-			jsonString = sendApiRequest(ApiCommands.RECENT_SCANS.apiCommand(), parameters);
+			jsonString = sendApiGetRequest(ApiCommands.RECENT_SCANS.apiCommand(), parameters);
 			json = new JSONObject(jsonString);
 		} catch (Exception ignored) {
 		}
@@ -129,7 +133,7 @@ public class Api {
 	 *         "tests_quantity": 11 }
 	 * 
 	 */
-	public JSONObject retrieveAssessment(final String hostname) {
+	public JSONObject retrieveCachedAssessment(final String hostname) {
 		String jsonString;
 		JSONObject json = new JSONObject();
 
@@ -137,7 +141,24 @@ public class Api {
 			Map<String, String> parameters = new HashMap<String, String>();
 			parameters.put("host", hostname);
 
-			jsonString = sendApiRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand(), parameters);
+			jsonString = sendApiGetRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand(), parameters);
+			json = new JSONObject(jsonString);
+		} catch (Exception ignored) {
+		}
+
+		return (json);
+	}
+
+	public JSONObject retrieveAssessment(final String hostname, final Boolean hidden) {
+		String jsonString;
+		JSONObject json = new JSONObject();
+
+		try {
+			Map<String, String> parameters = new HashMap<String, String>();
+			parameters.put("hidden", hidden.toString());
+			parameters.put("rescan", "true");
+
+			jsonString = sendApiPostRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand()+"?host="+hostname, parameters);
 			json = new JSONObject(jsonString);
 		} catch (Exception ignored) {
 		}
@@ -162,7 +183,7 @@ public class Api {
 			Map<String, String> parameters = new HashMap<String, String>();
 			parameters.put("scan", id);
 
-			jsonString = sendApiRequest(ApiCommands.RETRIEVE_TEST_RESULT.apiCommand(), parameters);
+			jsonString = sendApiGetRequest(ApiCommands.RETRIEVE_TEST_RESULT.apiCommand(), parameters);
 			json = new JSONObject(jsonString);
 		} catch (Exception ignored) {
 		}
@@ -178,7 +199,7 @@ public class Api {
 	 * @return String
 	 * @throws IOException
 	 */
-	private String sendApiRequest(String apiCall, Map<String, String> parameters) throws IOException {
+	private String sendApiGetRequest(String apiCall, Map<String, String> parameters) throws IOException {
 		URL url = new URL(API_URL + "/" + apiCall);
 
 		if (parameters != null) {
@@ -211,6 +232,44 @@ public class Api {
 		}
 
 		is.close();
+
+		return (apiResponseBuffer.toString());
+	}
+
+	private String sendApiPostRequest(String apiCall, Map<String, String> parameters) throws IOException {
+		URL url = new URL(API_URL + "/" + apiCall);
+
+		String urlParameters = buildGetParameterString(parameters);
+		byte[] postData       = urlParameters.getBytes( StandardCharsets.UTF_8 );
+		int    postDataLength = postData.length;
+
+		HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();           
+		conn.setDoOutput( true );
+		conn.setInstanceFollowRedirects( false );
+		conn.setRequestMethod( "POST" );
+		conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded"); 
+		conn.setRequestProperty( "charset", "utf-8");
+		conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+		conn.setUseCaches( false );
+		
+		
+		
+		try( DataOutputStream wr = new DataOutputStream( conn.getOutputStream())) {
+		   wr.write( postData );
+		}
+		
+		
+		InputStream is = conn.getInputStream();
+		int nextByteOfData = 0;
+
+		StringBuffer apiResponseBuffer = new StringBuffer();
+
+		while ((nextByteOfData = is.read()) != -1) {
+			apiResponseBuffer.append((char) nextByteOfData);
+		}
+
+		is.close();
+		conn.disconnect();
 
 		return (apiResponseBuffer.toString());
 	}

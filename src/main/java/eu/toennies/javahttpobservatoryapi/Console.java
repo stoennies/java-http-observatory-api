@@ -13,6 +13,10 @@ import org.json.JSONObject;
  */
 public class Console {
 
+	/**
+	 * The main class. 
+	 * @param the console parameters given to the program
+	 */
 	public static void main(String[] args) {
 		printHeader();
 
@@ -25,7 +29,7 @@ public class Console {
 		} else if ((args.length > 0 && args.length <= 3) && (args[0].equals(ApiCommands.RECENT_SCANS.consoleCommand())
 				|| args[0].equals(ApiCommands.RECENT_SCANS.consoleShortCommand()))) {
 			getRecentScans(args);
-		} else if ((args.length == 2) && (args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.consoleCommand())
+		} else if ((args.length >= 2) && (args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.consoleCommand())
 				|| args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.consoleShortCommand())) && args[1].contains("-host")) {
 			retrieveAssessment(args);
 		} else if ((args.length == 2) && (args[0].equals(ApiCommands.RETRIEVE_TEST_RESULT.consoleCommand())
@@ -37,15 +41,55 @@ public class Console {
 
 	}
 
+	/**
+	 * Print out an assessment. May be cached or fresh one. 
+	 * @param args - the console parameters
+	 */
 	private static void retrieveAssessment(String[] args) {
 		String host = ConsoleUtilities.arrayValueMatchRegex(args, "-host=(.+)");
+
+		Boolean rescan = false;
+		Boolean hidden = false;
+		
+		for(String arg : args) {
+			if(arg.contains("-rescan")) {
+				rescan = true;
+				
+			} else if(arg.contains("-hidden")) {
+				hidden = true;
+			}
+		}
 		
 		Api obervatoryApi = new Api();
 
-		JSONObject recentScans = obervatoryApi.retrieveAssessment(host);
+		JSONObject scan = null;
+		if(rescan) {
+			obervatoryApi.retrieveAssessment(host, hidden);
+			//Loop while observatory is working. Ask every 10 seconds
+			boolean running = true;
+			while(running) {
+				scan = obervatoryApi.retrieveCachedAssessment(host);
+				try {
+					if(scan.getString("state").equalsIgnoreCase("FINISHED")) {
+						running = false;
+					} else {
+						try {
+							Thread.sleep(10000);
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			scan = obervatoryApi.retrieveCachedAssessment(host);
+		}
+		
 		Map<String, Object> map;
 		try {
-			map = ConsoleUtilities.jsonToMap(recentScans);
+			map = ConsoleUtilities.jsonToMap(scan);
 
 			System.out.println("Assessment");
 			System.out.println("");
@@ -55,6 +99,10 @@ public class Console {
 		}		
 	}
 
+	/**
+	 * Print out the scan result for a given id.
+	 * @param args - the console parameters
+	 */
 	private static void retrieveResults(String[] args) {
 		String id = ConsoleUtilities.arrayValueMatchRegex(args, "-id=(.+)");
 		
@@ -73,6 +121,9 @@ public class Console {
 		}		
 	}
 	
+	/**
+	 * Print out the over all grade distribution.
+	 */
 	private static void getGradeDistribution() {
 		Api obervatoryApi = new Api();
 
@@ -90,6 +141,9 @@ public class Console {
 
 	}
 
+	/**
+	 * Print out the scanner states.
+	 */
 	private static void getScannerStates() {
 		Api obervatoryApi = new Api();
 
@@ -106,6 +160,10 @@ public class Console {
 		}
 	}
 
+	/**
+	 * Print out the recent scan results.
+	 * @param args - the console parameters
+	 */
 	private static void getRecentScans(String[] args) {
 		String max = null;
 		String min = null;
@@ -176,12 +234,15 @@ public class Console {
 		System.out.println("");
 		System.out.println("-r, --recentScans");
 		System.out.println("	Additional parameter:");
-		System.out.println("	-max - minimum score");
-		System.out.println("	-min - maximum score");
+		System.out.println("	-max (Integer) - minimum score");
+		System.out.println("	-min (Integer) - maximum score");
 		System.out.println("");
 		System.out.println(ApiCommands.RETRIEVE_ASSESSMENT.consoleShortCommand() + ", " + ApiCommands.RETRIEVE_ASSESSMENT.consoleCommand());
 		System.out.println("	Mandantory parameter:");
-		System.out.println("	-host - hostname");
+		System.out.println("	-host (String) - hostname");
+		System.out.println("	Additional parameter:");
+		System.out.println("	-rescan (boolean) - start fresh scan; default false");
+		System.out.println("	-hidden (boolean) - results not shown in getRecentScans; default false");
 		System.out.println("");
 		System.out.println(ApiCommands.RETRIEVE_TEST_RESULT.consoleShortCommand() + ", " + ApiCommands.RETRIEVE_TEST_RESULT.consoleCommand());
 		System.out.println("	Mandantory parameter:");
