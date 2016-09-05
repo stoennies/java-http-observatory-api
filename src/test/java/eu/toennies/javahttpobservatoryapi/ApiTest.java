@@ -1,12 +1,21 @@
 package eu.toennies.javahttpobservatoryapi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 public class ApiTest {
 
+	/**
+	 * Init proxy if needed
+	 */
+	@Before
+	public void init() {
+		Console.configureProxy();
+	}
+	
 	/**
 	 * A grade distribution call should not be null.
 	 */

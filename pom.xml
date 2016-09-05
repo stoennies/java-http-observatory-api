@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.toennies</groupId>
 	<artifactId>java-http-observatory-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>Java HTTP Observatory API</name>
 	<description>This Java library provides basic access to the Mozilla HTTP Observatory API.</description>
 	<url>https://github.com/stoennies/java-http-observatory-api</url>
@@ -21,6 +21,10 @@
 		<developerConnection>scm:git:git@github.com:stoennies/java-http-observatory-api.git</developerConnection>
 		<url>https://github.com/stoennies/java-http-observatory-api</url>
 	</scm>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
 	<developers>
 		<developer>

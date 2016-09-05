@@ -26,7 +26,9 @@ public class ApiAssert extends Assert {
 			
 			conn.disconnect();
 		}
-		catch(Exception ignored){}
+		catch(Exception ignored){
+			Assert.assertFalse("Failure in assertApiResponseCode method: " + ignored.getLocalizedMessage(), responseCode == -1);
+		}
 		
 		Assert.assertFalse("Failure in assertApiResponseCode method", responseCode == -1);
 		Assert.assertTrue("ResponseCode is not the expected one. (IS: " + responseCode + "; SHOULD BE: " + expected + ")", responseCode == expected);

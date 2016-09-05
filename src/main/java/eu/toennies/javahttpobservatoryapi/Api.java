@@ -3,6 +3,9 @@ package eu.toennies.javahttpobservatoryapi;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -22,7 +25,6 @@ import org.json.JSONObject;
  * https://github.com/mozilla/http-observatory/blob/master/httpobs/docs/api.md
  * 
  * @author Sascha Tönnies <https://github.com/stoennies>
- * @license GNU GENERAL PUBLIC LICENSE v3
  */
 public class Api {
 	private static final String API_URL = "https://http-observatory.security.mozilla.org/api/v1";
@@ -60,7 +62,7 @@ public class Api {
 			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
-		return (json);
+		return json;
 	}
 
 	/**
@@ -85,7 +87,7 @@ public class Api {
 			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
-		return (json);
+		return json;
 	}
 
 	/**
@@ -104,11 +106,6 @@ public class Api {
 	 *         "site7.mozilla.org": "F", "site8.mozilla.org": "B+",
 	 *         "site9.mozilla.org": "A+", "site0.mozilla.org": "A-" }
 	 */
-	/**
-	 * @param max
-	 * @param min
-	 * @return
-	 */
 	public JSONObject fetchRecentScans(final String max, final String min) {
 		String jsonString;
 		JSONObject json = new JSONObject();
@@ -126,7 +123,7 @@ public class Api {
 			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
-		return (json);
+		return json;
 	}
 
 	/**
@@ -160,7 +157,7 @@ public class Api {
 			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
-		return (json);
+		return json;
 	}
 
 	public JSONObject retrieveAssessment(final String hostname, final Boolean hidden) {
@@ -172,7 +169,8 @@ public class Api {
 			parameters.put("hidden", hidden.toString());
 			parameters.put("rescan", "true");
 
-			jsonString = sendApiPostRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand()+"?host="+hostname, parameters);
+			jsonString = sendApiPostRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand() + "?host=" + hostname,
+					parameters);
 			json = new JSONObject(jsonString);
 		} catch (IOException ignored) {
 			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
@@ -180,7 +178,7 @@ public class Api {
 			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
-		return (json);
+		return json;
 	}
 
 	/**
@@ -188,7 +186,8 @@ public class Api {
 	 * Policy, Subresource Integrity, etc. The results of all these tests can be
 	 * retrieved once the scan's state has been placed in the FINISHED state.
 	 * 
-	 * @param id - the scan id
+	 * @param id
+	 *            - the scan id
 	 * @return a single test object
 	 * 
 	 */
@@ -208,7 +207,7 @@ public class Api {
 			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		}
 
-		return (json);
+		return json;
 	}
 
 	/**
@@ -226,59 +225,51 @@ public class Api {
 			url = new URL(url.toString() + buildGetParameterString(parameters));
 		}
 
-		// TODO: Proxy settings via parameter
-		// InputStream is;
-		// if (Config.getInstance().isUseProxy()) {
-		// Proxy proxy = new Proxy(Proxy.Type.HTTP, new
-		// InetSocketAddress(Config.getInstance().getProxyIp(),
-		// Config.getInstance().getProxyPort()));
-		// is = ((HttpURLConnection)
-		// url.openConnection(proxy)).getInputStream();
-		// } else {
-		// is = ((HttpURLConnection) url.openConnection()).getInputStream();
-		// }
-		// while ((nextByteOfData = is.read()) != -1) {
-		// apiResponseBuffer.append((char) nextByteOfData);
-		// }
-		// is.close();
-
-		InputStream is = url.openStream();
+		InputStream is;
+		if (Console.PROXY == null) {
+			is = url.openStream();
+		} else {
+			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Console.PROXY.split(":")[0], Integer.parseInt(Console.PROXY.split(":")[1])));
+			is = ((HttpURLConnection)url.openConnection(proxy)).getInputStream();
+		}
+		
 		int nextByteOfData = 0;
-
 		StringBuffer apiResponseBuffer = new StringBuffer();
-
 		while ((nextByteOfData = is.read()) != -1) {
 			apiResponseBuffer.append((char) nextByteOfData);
 		}
-
 		is.close();
 
-		return (apiResponseBuffer.toString());
+		return apiResponseBuffer.toString();
 	}
 
 	private String sendApiPostRequest(String apiCall, Map<String, String> parameters) throws IOException {
 		URL url = new URL(API_URL + "/" + apiCall);
 
 		String urlParameters = buildGetParameterString(parameters);
-		byte[] postData       = urlParameters.getBytes( StandardCharsets.UTF_8 );
-		int    postDataLength = postData.length;
-
-		HttpsURLConnection conn= (HttpsURLConnection) url.openConnection();           
-		conn.setDoOutput( true );
-		conn.setInstanceFollowRedirects( false );
-		conn.setRequestMethod( "POST" );
-		conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded"); 
-		conn.setRequestProperty( "charset", "utf-8");
-		conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
-		conn.setUseCaches( false );
+		byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+		int postDataLength = postData.length;
 		
-		
-		
-		try( DataOutputStream wr = new DataOutputStream( conn.getOutputStream())) {
-		   wr.write( postData );
+		HttpsURLConnection conn;
+		if (Console.PROXY == null) {
+			conn = (HttpsURLConnection) url.openConnection();
+		} else {
+			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Console.PROXY.split(":")[0], Integer.parseInt(Console.PROXY.split(":")[1])));
+			conn = (HttpsURLConnection) url.openConnection(proxy);
 		}
-		
-		
+
+		conn.setDoOutput(true);
+		conn.setInstanceFollowRedirects(false);
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		conn.setRequestProperty("charset", "utf-8");
+		conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+		conn.setUseCaches(false);
+
+		try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+			wr.write(postData);
+		}
+
 		InputStream is = conn.getInputStream();
 		int nextByteOfData = 0;
 
@@ -291,7 +282,7 @@ public class Api {
 		is.close();
 		conn.disconnect();
 
-		return (apiResponseBuffer.toString());
+		return apiResponseBuffer.toString();
 	}
 
 	/**
@@ -303,7 +294,6 @@ public class Api {
 	private String buildGetParameterString(Map<String, String> parameters) {
 		StringBuffer getParameterString = new StringBuffer();
 
-		
 		for (Map.Entry<String, String> param : parameters.entrySet()) {
 			if (param.getValue() == null) {
 				continue;
