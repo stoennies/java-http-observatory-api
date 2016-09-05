@@ -9,4 +9,4 @@ cache:
 branches:
   only:
     - master
-- stable
+    - stable
