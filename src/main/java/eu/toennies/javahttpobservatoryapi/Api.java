@@ -299,7 +299,7 @@ public class Api {
 				continue;
 			}
 
-			getParameterString.append((getParameterString.length() < 1) ? "?" : "&");
+			getParameterString.append(getParameterString.length() < 1 ? "?" : "&");
 			getParameterString.append(param.getKey());
 			getParameterString.append("=");
 			getParameterString.append(param.getValue());

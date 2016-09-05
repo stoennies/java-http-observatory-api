@@ -29,7 +29,6 @@ public class Console {
 
 	private String proxy = null;
 
-	
 	public String getProxy() {
 		return proxy;
 	}
@@ -50,30 +49,29 @@ public class Console {
 	 */
 	public static void main(String[] args) {
 		printHeader();
-
-		if (args.length == 1 && (args[0].equals(ApiCommands.GRADE_DISTRIBUTION.getConsoleCommand())
-				|| args[0].equals(ApiCommands.GRADE_DISTRIBUTION.getConsoleShortCommand()))) {
-			getGradeDistribution();
-		} else if (args.length == 1 && (args[0].equals(ApiCommands.GRADE_DISTRIBUTION.getConsoleCommand())
-				|| args[0].equals(ApiCommands.SCANNER_STATES.getConsoleShortCommand()))) {
+		
+		List<String> arguments = Arrays.asList(args);
+		if(arguments.contains(ApiCommands.GRADE_DISTRIBUTION.getConsoleCommand()) || arguments.contains(ApiCommands.GRADE_DISTRIBUTION.getConsoleShortCommand())) {
+			getGradeDistribution();			
+		} else  if(arguments.contains(ApiCommands.SCANNER_STATES.getConsoleCommand()) || arguments.contains(ApiCommands.SCANNER_STATES.getConsoleShortCommand())) {
 			getScannerStates();
-		} else if ((args.length > 0 && args.length <= 3) && (args[0].equals(ApiCommands.RECENT_SCANS.getConsoleCommand())
-				|| args[0].equals(ApiCommands.RECENT_SCANS.getConsoleShortCommand()))) {
+		} else if(arguments.contains(ApiCommands.RECENT_SCANS.getConsoleCommand()) || arguments.contains(ApiCommands.RECENT_SCANS.getConsoleShortCommand())) {
 			getRecentScans(args);
-		} else if (args.length >= 2
-				&& (args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.getConsoleCommand())
-						|| args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.getConsoleShortCommand()))
-				&& args[1].contains("-host")) {
-			retrieveAssessment(args);
-		} else if (args.length == 2
-				&& (args[0].equals(ApiCommands.RETRIEVE_TEST_RESULT.getConsoleCommand())
-						|| args[0].equals(ApiCommands.RETRIEVE_TEST_RESULT.getConsoleShortCommand()))
-				&& args[1].contains("-id")) {
-			retrieveResults(args);
+		} else if(arguments.contains(ApiCommands.RETRIEVE_ASSESSMENT.getConsoleCommand()) || arguments.contains(ApiCommands.RETRIEVE_ASSESSMENT.getConsoleShortCommand())) {
+			if(arguments.contains("-host")) {
+				retrieveAssessment(args);
+			} else {
+				printUsage();
+			}
+		} else if(arguments.contains(ApiCommands.RETRIEVE_TEST_RESULT.getConsoleCommand()) || arguments.contains(ApiCommands.RETRIEVE_TEST_RESULT.getConsoleShortCommand())) {
+			if(arguments.contains("-id")) {
+				retrieveResults(args);
+			} else {
+				printUsage();
+			}
 		} else {
 			printUsage();
 		}
-
 	}
 
 	/**
