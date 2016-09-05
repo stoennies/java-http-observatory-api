@@ -1,5 +1,6 @@
 package eu.toennies.javahttpobservatoryapi;
 
+import java.io.IOException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -7,6 +8,12 @@ import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONObject;
 import org.junit.Assert;
 
+/**
+ * An assert class to handle json objects.
+ * 
+ * @author Sascha Tönnies <https://github.com/stoennies>
+ *
+ */
 public class ApiAssert extends Assert {
 	
 	public static void assertApiDataFetched(JSONObject apiData)
@@ -26,7 +33,7 @@ public class ApiAssert extends Assert {
 			
 			conn.disconnect();
 		}
-		catch(Exception ignored){
+		catch(IOException ignored){
 			Assert.assertFalse("Failure in assertApiResponseCode method: " + ignored.getLocalizedMessage(), responseCode == -1);
 		}
 		

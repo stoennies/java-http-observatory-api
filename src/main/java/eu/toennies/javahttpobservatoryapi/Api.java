@@ -28,7 +28,7 @@ import org.json.JSONObject;
  */
 public class Api {
 	private static final String API_URL = "https://http-observatory.security.mozilla.org/api/v1";
-	private static final String VERSION = "0.0.1-SNAPSHOT";
+	private static final String VERSION = "1.0-SNAPSHOT";
 
 	/**
 	 * Getter for VERSION
@@ -54,7 +54,7 @@ public class Api {
 		JSONObject json = new JSONObject();
 
 		try {
-			jsonString = sendApiGetRequest(ApiCommands.SCANNER_STATES.apiCommand(), null);
+			jsonString = sendApiGetRequest(ApiCommands.SCANNER_STATES.getApiCommand(), null);
 			json = new JSONObject(jsonString);
 		} catch (IOException ignored) {
 			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
@@ -79,7 +79,7 @@ public class Api {
 		JSONObject json = new JSONObject();
 
 		try {
-			jsonString = sendApiGetRequest(ApiCommands.SCANNER_STATES.apiCommand(), null);
+			jsonString = sendApiGetRequest(ApiCommands.SCANNER_STATES.getApiCommand(), null);
 			json = new JSONObject(jsonString);
 		} catch (IOException ignored) {
 			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
@@ -115,7 +115,7 @@ public class Api {
 			parameters.put("max", max);
 			parameters.put("min", min);
 
-			jsonString = sendApiGetRequest(ApiCommands.RECENT_SCANS.apiCommand(), parameters);
+			jsonString = sendApiGetRequest(ApiCommands.RECENT_SCANS.getApiCommand(), parameters);
 			json = new JSONObject(jsonString);
 		} catch (IOException ignored) {
 			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
@@ -149,7 +149,7 @@ public class Api {
 			Map<String, String> parameters = new HashMap<String, String>();
 			parameters.put("host", hostname);
 
-			jsonString = sendApiGetRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand(), parameters);
+			jsonString = sendApiGetRequest(ApiCommands.RETRIEVE_ASSESSMENT.getApiCommand(), parameters);
 			json = new JSONObject(jsonString);
 		} catch (IOException ignored) {
 			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
@@ -169,7 +169,7 @@ public class Api {
 			parameters.put("hidden", hidden.toString());
 			parameters.put("rescan", "true");
 
-			jsonString = sendApiPostRequest(ApiCommands.RETRIEVE_ASSESSMENT.apiCommand() + "?host=" + hostname,
+			jsonString = sendApiPostRequest(ApiCommands.RETRIEVE_ASSESSMENT.getApiCommand() + "?host=" + hostname,
 					parameters);
 			json = new JSONObject(jsonString);
 		} catch (IOException ignored) {
@@ -199,7 +199,7 @@ public class Api {
 			Map<String, String> parameters = new HashMap<String, String>();
 			parameters.put("scan", id);
 
-			jsonString = sendApiGetRequest(ApiCommands.RETRIEVE_TEST_RESULT.apiCommand(), parameters);
+			jsonString = sendApiGetRequest(ApiCommands.RETRIEVE_TEST_RESULT.getApiCommand(), parameters);
 			json = new JSONObject(jsonString);
 		} catch (IOException ignored) {
 			Logger.getGlobal().severe("Could not send API request: " + ignored.getLocalizedMessage());
@@ -226,10 +226,10 @@ public class Api {
 		}
 
 		InputStream is;
-		if (Console.PROXY == null) {
+		if (Console.getInstance().getProxy() == null) {
 			is = url.openStream();
 		} else {
-			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Console.PROXY.split(":")[0], Integer.parseInt(Console.PROXY.split(":")[1])));
+			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Console.getInstance().getProxy().split(":")[0], Integer.parseInt(Console.getInstance().getProxy().split(":")[1])));
 			is = ((HttpURLConnection)url.openConnection(proxy)).getInputStream();
 		}
 		
@@ -251,10 +251,10 @@ public class Api {
 		int postDataLength = postData.length;
 		
 		HttpsURLConnection conn;
-		if (Console.PROXY == null) {
+		if (Console.getInstance().getProxy() == null) {
 			conn = (HttpsURLConnection) url.openConnection();
 		} else {
-			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Console.PROXY.split(":")[0], Integer.parseInt(Console.PROXY.split(":")[1])));
+			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Console.getInstance().getProxy().split(":")[0], Integer.parseInt(Console.getInstance().getProxy().split(":")[1])));
 			conn = (HttpsURLConnection) url.openConnection(proxy);
 		}
 
@@ -299,7 +299,7 @@ public class Api {
 				continue;
 			}
 
-			getParameterString.append((getParameterString.length() < 1) ? ("?") : ("&"));
+			getParameterString.append((getParameterString.length() < 1) ? "?" : "&");
 			getParameterString.append(param.getKey());
 			getParameterString.append("=");
 			getParameterString.append(param.getValue());

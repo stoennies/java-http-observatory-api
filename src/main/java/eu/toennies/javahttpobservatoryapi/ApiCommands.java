@@ -1,5 +1,11 @@
 package eu.toennies.javahttpobservatoryapi;
 
+/**
+ * Enumaration for available API commands.
+ * 
+ * @author Sascha Tönnies <https://github.com/stoennies>
+ *
+ */
 public enum ApiCommands {
 	GRADE_DISTRIBUTION("getGradeDistribution", "--gradeDistribution", "-g"), 
 	SCANNER_STATES("getScannerStates", "--scannerStates", "-s"),
@@ -11,6 +17,13 @@ public enum ApiCommands {
 	private String consoleCommand;
 	private String consoleShortCommand;
 
+	/**
+	 * Constructor for new API command.
+	 * 
+	 * @param apiCommand - the original API command as listed in the API documentation of Mozilla's HTTP Observatory
+	 * @param console - the command for the console
+	 * @param consoleShort - the short version of the console command
+	 */
 	ApiCommands(final String apiCommand, final String console, final String consoleShort) {
 		this.apiCommand = apiCommand;
 		this.consoleCommand = console;
@@ -18,15 +31,28 @@ public enum ApiCommands {
 		
 	}
 	
-	public String apiCommand() {
+	/**
+	 * Retrieve the API command.
+	 * 
+	 * @return the API command to send to the API endpoint
+	 */
+	public String getApiCommand() {
 		return this.apiCommand;
 	}
 
-	public String consoleCommand() {
+	/**
+	 * The long command version used as program parameter.
+	 * @return the command
+	 */
+	public String getConsoleCommand() {
 		return consoleCommand;
 	}
 
-	public String consoleShortCommand() {
+	/**
+	 * The short version used as program parameter
+	 * @return the short command version
+	 */
+	public String getConsoleShortCommand() {
 		return consoleShortCommand;
 	}
 

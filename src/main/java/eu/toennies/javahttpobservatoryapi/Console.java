@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -13,13 +15,32 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
+ * The console class. Starting point for the programm.
  * 
  * @author Sascha Tönnies <https://github.com/stoennies>
  *
  */
 public class Console {
 
-	static String PROXY = null;
+	/**
+	 * singelton instance
+	 */
+	private static final Console CONSOLE = new Console();
+
+	private String proxy = null;
+
+	
+	public String getProxy() {
+		return proxy;
+	}
+
+	private Console() {
+		configureProxy();
+	}
+
+	public static Console getInstance() {
+		return CONSOLE;
+	}
 
 	/**
 	 * The main class.
@@ -28,26 +49,25 @@ public class Console {
 	 *            the console parameters given to the program
 	 */
 	public static void main(String[] args) {
-		configureProxy();
 		printHeader();
 
-		if (args.length == 1 && (args[0].equals(ApiCommands.GRADE_DISTRIBUTION.consoleCommand())
-				|| args[0].equals(ApiCommands.GRADE_DISTRIBUTION.consoleShortCommand()))) {
+		if (args.length == 1 && (args[0].equals(ApiCommands.GRADE_DISTRIBUTION.getConsoleCommand())
+				|| args[0].equals(ApiCommands.GRADE_DISTRIBUTION.getConsoleShortCommand()))) {
 			getGradeDistribution();
-		} else if (args.length == 1 && (args[0].equals(ApiCommands.GRADE_DISTRIBUTION.consoleCommand())
-				|| args[0].equals(ApiCommands.SCANNER_STATES.consoleShortCommand()))) {
+		} else if (args.length == 1 && (args[0].equals(ApiCommands.GRADE_DISTRIBUTION.getConsoleCommand())
+				|| args[0].equals(ApiCommands.SCANNER_STATES.getConsoleShortCommand()))) {
 			getScannerStates();
-		} else if ((args.length > 0 && args.length <= 3) && (args[0].equals(ApiCommands.RECENT_SCANS.consoleCommand())
-				|| args[0].equals(ApiCommands.RECENT_SCANS.consoleShortCommand()))) {
+		} else if ((args.length > 0 && args.length <= 3) && (args[0].equals(ApiCommands.RECENT_SCANS.getConsoleCommand())
+				|| args[0].equals(ApiCommands.RECENT_SCANS.getConsoleShortCommand()))) {
 			getRecentScans(args);
-		} else if ((args.length >= 2)
-				&& (args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.consoleCommand())
-						|| args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.consoleShortCommand()))
+		} else if (args.length >= 2
+				&& (args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.getConsoleCommand())
+						|| args[0].equals(ApiCommands.RETRIEVE_ASSESSMENT.getConsoleShortCommand()))
 				&& args[1].contains("-host")) {
 			retrieveAssessment(args);
-		} else if ((args.length == 2)
-				&& (args[0].equals(ApiCommands.RETRIEVE_TEST_RESULT.consoleCommand())
-						|| args[0].equals(ApiCommands.RETRIEVE_TEST_RESULT.consoleShortCommand()))
+		} else if (args.length == 2
+				&& (args[0].equals(ApiCommands.RETRIEVE_TEST_RESULT.getConsoleCommand())
+						|| args[0].equals(ApiCommands.RETRIEVE_TEST_RESULT.getConsoleShortCommand()))
 				&& args[1].contains("-id")) {
 			retrieveResults(args);
 		} else {
@@ -61,7 +81,7 @@ public class Console {
 	 * set the proxy and remove parameter from args.
 	 * 
 	 */
-	public static void configureProxy() {
+	private void configureProxy() {
 		File file = new File("proxy");
 		if (!file.exists()) {
 			return;
@@ -72,7 +92,7 @@ public class Console {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
 			String proxy = reader.readLine();
 			if (proxy != null) {
-				PROXY = proxy;
+				this.proxy = proxy;
 			}
 			reader.close();
 		} catch (FileNotFoundException e) {
@@ -91,22 +111,16 @@ public class Console {
 	private static void retrieveAssessment(String[] args) {
 		String host = ConsoleUtilities.arrayValueMatchRegex(args, "-host=(.+)");
 
-		Boolean rescan = false;
 		Boolean hidden = false;
-
-		for (String arg : args) {
-			if (arg.contains("-rescan")) {
-				rescan = true;
-
-			} else if (arg.contains("-hidden")) {
-				hidden = true;
-			}
+		List<String> arguments = Arrays.asList(args);
+		if (arguments.contains("-hidden")) {
+			hidden = true;
 		}
 
 		Api obervatoryApi = new Api();
 
 		JSONObject scan = null;
-		if (rescan) {
+		if (arguments.contains("-rescan")) {
 			obervatoryApi.retrieveAssessment(host, hidden);
 			// Loop while observatory is working. Ask every 10 seconds
 			boolean running = true;
@@ -284,16 +298,16 @@ public class Console {
 		System.out.println("	-max (Integer) - minimum score");
 		System.out.println("	-min (Integer) - maximum score");
 		System.out.println("");
-		System.out.println(ApiCommands.RETRIEVE_ASSESSMENT.consoleShortCommand() + ", "
-				+ ApiCommands.RETRIEVE_ASSESSMENT.consoleCommand());
+		System.out.println(ApiCommands.RETRIEVE_ASSESSMENT.getConsoleShortCommand() + ", "
+				+ ApiCommands.RETRIEVE_ASSESSMENT.getConsoleCommand());
 		System.out.println("	Mandantory parameter:");
 		System.out.println("	-host (String) - hostname");
 		System.out.println("	Additional parameter:");
 		System.out.println("	-rescan (boolean) - start fresh scan; default false");
 		System.out.println("	-hidden (boolean) - results not shown in getRecentScans; default false");
 		System.out.println("");
-		System.out.println(ApiCommands.RETRIEVE_TEST_RESULT.consoleShortCommand() + ", "
-				+ ApiCommands.RETRIEVE_TEST_RESULT.consoleCommand());
+		System.out.println(ApiCommands.RETRIEVE_TEST_RESULT.getConsoleShortCommand() + ", "
+				+ ApiCommands.RETRIEVE_TEST_RESULT.getConsoleCommand());
 		System.out.println("	Mandantory parameter:");
 		System.out.println("	-id - scan id");
 		System.out.println("");

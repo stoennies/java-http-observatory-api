@@ -6,6 +6,12 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test class for the api.
+ * 
+ * @author Sascha Tönnies <https://github.com/stoennies>
+ *
+ */
 public class ApiTest {
 
 	/**
@@ -13,7 +19,7 @@ public class ApiTest {
 	 */
 	@Before
 	public void init() {
-		Console.configureProxy();
+		Console.getInstance();
 	}
 	
 	/**

@@ -12,6 +12,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * This class holds utility methods for the console.
+ * 
+ * @author Sascha Toennies <https://github.com/stoennies>
+ *
+ */
 public class ConsoleUtilities 
 {
 	private static String newLine = "\n";
@@ -31,6 +37,13 @@ public class ConsoleUtilities
 	    return retMap;
 	}
 
+	/**
+	 * Converts a json object into a map object.
+	 * 
+	 * @param object - the json object
+	 * @return a map with json object keys as key and the json object values as value
+	 * @throws JSONException
+	 */
 	public static Map<String, Object> toMap(JSONObject object) throws JSONException {
 	    Map<String, Object> map = new HashMap<String, Object>();
 
