@@ -30,6 +30,12 @@ public class Api {
 			PROP.load(resourceAsStream);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				resourceAsStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -42,16 +48,6 @@ public class Api {
 		return PROP.getProperty("version");
 	}
 	
-	/**
-	 * The revision
-	 * 
-	 * @return String
-	 */
-	public static String getRevision() {
-		return PROP.getProperty("revision");
-	}
-	
-
 	/**
 	 * Sends an api request and return api response
 	 * 

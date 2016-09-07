@@ -12,8 +12,7 @@ public enum ApiCommands {
 	RECENT_SCANS(new RecentScansCommand()),
 	INVOKE_ASSESSMENT(new InvokeAssessmentCommand()),
 	RETRIEVE_ASSESSMENT(new RetrieveAssessmentCommand()),
-	RETRIEVE_TEST_RESULT(new RetrieveTestResultsCommand()),
-	HELP(new HelpCommand());
+	RETRIEVE_TEST_RESULT(new RetrieveTestResultsCommand());
 
 
 	private ApiCommand apiCommand;

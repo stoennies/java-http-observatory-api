@@ -3,6 +3,7 @@ package eu.toennies.javahttpobservatoryapi;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -74,8 +75,9 @@ public class ApiTest {
 		try {
 			// Argument host is mandatory. Should fail
 			assessment = cmd.run(null);
+			fail("InvokeAssessmentCommand called without an host argument. This should not be possible.");
 		} catch(IllegalArgumentException e) {
-			assertTrue(true);
+			//ignore
 		}
 		
 		
@@ -117,6 +119,7 @@ public class ApiTest {
 	/**
 	 * A recent scan call should not be null.
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testRecentScansCommand() {
 		RecentScansCommand cmd = new RecentScansCommand();
@@ -128,11 +131,10 @@ public class ApiTest {
 		List<String> arguments = new ArrayList<String>();
 		arguments.add("min=100");
 		json = cmd.run(arguments);
-		String key = new String();
-		for(@SuppressWarnings("unchecked")
-		Iterator<String> it = json.keys(); it.hasNext(); key = it.next()) {
+		String key;
+		for(Iterator<String> it = json.keys(); it.hasNext();) {
+			key = it.next();
 			try {
-				if(key.equals("")) continue;
 				assertTrue("Calling recent scan with a minimum score of 100 should only retrieve A+ score", json.get(key).equals("A+"));
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -143,10 +145,9 @@ public class ApiTest {
 		arguments.add("max=80");
 		json = cmd.run(arguments);
 		key = new String();
-		for(@SuppressWarnings("unchecked")
-		Iterator<String> it = json.keys(); it.hasNext(); key = it.next()) {
+		for(Iterator<String> it = json.keys(); it.hasNext();) {
 			try {
-				if(key.equals("")) continue;
+				key = it.next();
 				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores", json.get(key).equals("A-"));
 				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores", json.get(key).equals("A"));
 				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores", json.get(key).equals("A+"));

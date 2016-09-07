@@ -58,13 +58,7 @@ public class InvokeAssessmentCommand extends ApiCommand {
 
 		try {
 			json = new JSONObject(api.sendApiPostRequest(getApiCommand() + "?host=" + host, postParameters));
-			if (json.has("error")) {
-				String error = json.getString("error");
-				if (error.equals("rescan-attempt-too-soon")) {
-					throw new IOException(
-							"A resacan attempt to soon. Try calling without \"rescan\" or wait 5 minutes.");
-				}
-			}
+			checkForError(json);
 		} catch (JSONException e) {
 			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());
 		} catch (IOException e) {
@@ -72,5 +66,15 @@ public class InvokeAssessmentCommand extends ApiCommand {
 		}
 
 		return json;
+	}
+
+	private void checkForError(JSONObject json) throws IOException, JSONException {
+		if (json.has("error")) {
+			String error = json.getString("error");
+			if ("rescan-attempt-too-soon".equals(error)) {
+				throw new IOException(
+						"A resacan attempt to soon. Try calling without \"rescan\" or wait 5 minutes.");
+			}
+		}
 	}
 }

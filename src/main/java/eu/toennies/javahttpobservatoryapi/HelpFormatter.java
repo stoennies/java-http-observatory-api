@@ -150,14 +150,13 @@ public class HelpFormatter {
 	 * Print the help for <code>ApiCommands</code> with the specified command
 	 * line syntax. This method prints help information to System.out.
 	 *
-	 * @param cmdLineSyntax
-	 *            the syntax for this application
+	 * @param commands
+	 *            ApiCommands to format
 	 */
 	public void printHelp(ApiCommands[] commands) {
 		String jarName = "java-http-observatory-api-" + Api.getVersion() + ".jar";
 		String jarExecution = "java -jar " + jarName;
-		String footer = new String(
-				"If you need to use a proxy, please create a file called \"proxy\" in program directory and fill with one line containing proxy ip:port");
+		String footer = "If you need to use a proxy, please create a file called \"proxy\" in program directory and fill with one line containing proxy ip:port";
 
 		printHelp(getWidth(), jarExecution, getHeader(), commands, footer);
 	}
@@ -172,12 +171,10 @@ public class HelpFormatter {
 	 *            the syntax for this application
 	 * @param header
 	 *            the banner to display at the beginning of the help
-	 * @param options
-	 *            the Options instance
+	 * @param commands
+	 *            commands the Options instance
 	 * @param footer
 	 *            the banner to display at the end of the help
-	 * @param autoUsage
-	 *            whether to print an automatically generated usage statement
 	 */
 	public void printHelp(int width, String cmdLineSyntax, String header, ApiCommands[] commands, String footer) {
 		printHelp(width, cmdLineSyntax, header, commands, getLeftPadding(), getDescPadding(), footer);
@@ -188,16 +185,14 @@ public class HelpFormatter {
 	 * Print the help for <code>ApiCommands[]</code> with the specified command
 	 * line syntax.
 	 *
-	 * @param pw
-	 *            the writer to which the help will be written
 	 * @param width
 	 *            the number of characters to be displayed on each line
 	 * @param cmdLineSyntax
 	 *            the syntax for this application
 	 * @param header
 	 *            the banner to display at the beginning of the help
-	 * @param options
-	 *            the Options instance
+	 * @param commands
+	 *            the Commands instance
 	 * @param leftPad
 	 *            the number of characters of padding to be prefixed to each
 	 *            line
@@ -206,14 +201,12 @@ public class HelpFormatter {
 	 *            description line
 	 * @param footer
 	 *            the banner to display at the end of the help
-	 * @param autoUsage
-	 *            whether to print an automatically generated usage statement
 	 *
 	 * @throws IllegalStateException
 	 *             if there is no room to print a line
 	 */
-	public void printHelp(int width, String cmdLineSyntax, String header, ApiCommands[] commands,
-			int leftPad, int descPad, String footer) {
+	public void printHelp(int width, String cmdLineSyntax, String header, ApiCommands[] commands, int leftPad,
+			int descPad, String footer) {
 		if (cmdLineSyntax == null || cmdLineSyntax.length() == 0) {
 			throw new IllegalArgumentException("cmdLineSyntax not provided");
 		}
@@ -236,8 +229,6 @@ public class HelpFormatter {
 	 * Print the cmdLineSyntax to the specified writer, using the specified
 	 * width.
 	 *
-	 * @param pw
-	 *            The printWriter to write the help to
 	 * @param width
 	 *            The number of characters per line for the usage statement.
 	 * @param cmdLineSyntax
@@ -252,8 +243,6 @@ public class HelpFormatter {
 	/**
 	 * Print the specified text to the specified PrintWriter.
 	 *
-	 * @param pw
-	 *            The printWriter to write the help to
 	 * @param width
 	 *            The number of characters to display per line
 	 * @param nextLineTabStop
@@ -445,8 +434,6 @@ public class HelpFormatter {
 	/**
 	 * Print the specified text to the specified PrintWriter.
 	 *
-	 * @param pw
-	 *            The printWriter to write the help to
 	 * @param width
 	 *            The number of characters to display per line
 	 * @param text
@@ -495,8 +482,6 @@ public class HelpFormatter {
 	 * Print the help for the specified Options to the specified writer, using
 	 * the specified width, left padding and description padding.
 	 *
-	 * @param pw
-	 *            The printWriter to write the help to
 	 * @param width
 	 *            The number of characters to display per line
 	 * @param commands
@@ -542,25 +527,14 @@ public class HelpFormatter {
 
 		List<StringBuffer> prefixList = new ArrayList<StringBuffer>();
 		for (ApiCommands cmds : commands) {
-			StringBuffer optBuf = new StringBuffer();
 			ApiCommand command = cmds.getCommand();
+			StringBuffer optBuf = new StringBuffer();
 
 			optBuf.append(lpad).append(command.getConsoleShortCommand());
 			optBuf.append(", ").append(command.getConsoleCommand());
 
 			if (command.hasArgs()) {
-				for (CommandArgument arg : command.getCommandArguments()) {
-					String argName = arg.getKey();
-					if (argName != null && argName.length() == 0) {
-						// if the option has a blank argname
-						optBuf.append(' ');
-					} else {
-						optBuf.append(" ");
-						// optBuf.append(option.hasLongOpt() ? longOptSeparator
-						// : " ");
-						optBuf.append("<").append(argName).append("=value>");
-					}
-				}
+				renderArgs(optBuf, command);
 			}
 
 			prefixList.add(optBuf);
@@ -571,21 +545,21 @@ public class HelpFormatter {
 
 		for (Iterator<ApiCommands> it = Arrays.asList(commands).iterator(); it.hasNext();) {
 			ApiCommands option = it.next();
-			StringBuilder optBuf = new StringBuilder(prefixList.get(x++).toString());
+			StringBuilder opt2Buf = new StringBuilder(prefixList.get(x++).toString());
 
-			if (optBuf.length() < max) {
-				optBuf.append(createPadding(max - optBuf.length()));
+			if (opt2Buf.length() < max) {
+				opt2Buf.append(createPadding(max - opt2Buf.length()));
 			}
 
-			optBuf.append(dpad);
+			opt2Buf.append(dpad);
 
 			int nextLineTabStop = max + descPad;
 
 			if (option.getCommand().getDescription() != null) {
-				optBuf.append(option.getCommand().getDescription());
+				opt2Buf.append(option.getCommand().getDescription());
 			}
 
-			renderWrappedText(sb, width, nextLineTabStop, optBuf.toString());
+			renderWrappedText(sb, width, nextLineTabStop, opt2Buf.toString());
 
 			if (it.hasNext()) {
 				sb.append(getNewLine());
@@ -593,6 +567,19 @@ public class HelpFormatter {
 		}
 
 		return sb;
+	}
+
+	private void renderArgs(StringBuffer optBuf, final ApiCommand command) {
+		for (CommandArgument arg : command.getCommandArguments()) {
+			String argName = arg.getKey();
+			if (argName != null && argName.length() == 0) {
+				// if the option has a blank argname
+				optBuf.append(' ');
+			} else {
+				optBuf.append(" ");
+				optBuf.append("<").append(argName).append("=value>");
+			}
+		}		
 	}
 
 }

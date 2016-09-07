@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -24,24 +26,27 @@ import eu.toennies.javahttpobservatoryapi.commands.ApiCommands;
  *
  */
 public class Console {
-	
-	/**
-	 * Holder class for singelton according to the Initialization-on-demand holder idiom.
-	 * 
-	 * @author Sascha Tönnies <https://github.com/stoennies>
-	 *
-	 */
-	private static class Holder {
-		static final Console INSTANCE = new Console();
-	}
 
 	/**
 	 * Proxy settings
 	 */
 	private String proxy = null;
 
+
+	/**
+	 * Holder class for singelton according to the Initialization-on-demand
+	 * holder idiom.
+	 * 
+	 * @author Sascha Tönnies <https://github.com/stoennies>
+	 *
+	 */
+	private static class Holder {
+		private static final Console INSTANCE = new Console();
+	}
+
 	/**
 	 * Retrieve the proxy
+	 * 
 	 * @return a proxyIP:port if configured null otherwise
 	 */
 	public String getProxy() {
@@ -49,7 +54,7 @@ public class Console {
 	}
 
 	/**
-	 * Hidden constructor for singelton. 
+	 * Hidden constructor for singelton.
 	 */
 	private Console() {
 		configureProxy();
@@ -57,6 +62,7 @@ public class Console {
 
 	/**
 	 * Get the console.
+	 * 
 	 * @return the singelton console
 	 */
 	public static Console getInstance() {
@@ -70,28 +76,50 @@ public class Console {
 	 *            the console parameters given to the program
 	 */
 	public static void main(String[] args) {
-		System.out.println(Api.getVersion());
 		List<String> arguments = Arrays.asList(args);
-		PrintWriter pw = new PrintWriter(System.out);
-		for (ApiCommands cmds : ApiCommands.values()) {
-			ApiCommand cmd = cmds.getCommand();
-			if(cmd.shouldStart(arguments)) {
-				try {
-					JSONObject json = cmd.run(arguments);
+		
+		if(arguments.contains(ApiCommand.DEFAULT_CMD_PREFIX + "h") || arguments.contains(ApiCommand.DEFAULT_LONG_CMD_PREFIX + "help")) {
+			printHelp();
+			return;
+		}
+		
+		PrintWriter pw = null;
+		try {
+			pw = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));
+			for (ApiCommands cmds : ApiCommands.values()) {
+				ApiCommand cmd = cmds.getCommand();
+				if (cmd.shouldStart(arguments)) {
+					try {
+						JSONObject json = cmd.run(arguments);
 
-					pw.println(cmd.getHeader());
-					pw.println("");
-					pw.println(ConsoleUtilities.mapToConsoleOutput(ConsoleUtilities.jsonToMap(json)));
-					pw.flush();
+						pw.println(cmd.getHeader());
+						pw.println("");
+						pw.println(ConsoleUtilities.mapToConsoleOutput(ConsoleUtilities.jsonToMap(json)));
+						pw.flush();
 
-				} catch (JSONException e) {
-					System.err.println("Could not pars API response: " + e.getLocalizedMessage());
-				} catch (IllegalArgumentException ia) {
-					System.err.println(ia.getLocalizedMessage());
+					} catch (JSONException e) {
+						System.err.println("Could not pars API response: " + e.getLocalizedMessage());
+					} catch (IllegalArgumentException ia) {
+						System.err.println(ia.getLocalizedMessage());
+					}
 				}
 			}
+		} catch (UnsupportedEncodingException e) {
+
+		} finally {
+			if (pw != null) {
+				pw.close();
+			}
 		}
-		pw.close();
+	}
+
+	private static void printHelp() {
+		try {
+			HelpFormatter hf = new HelpFormatter(new PrintWriter(new OutputStreamWriter(System.out, "UTF-8")));
+			hf.printHelp(ApiCommands.values());
+		} catch(UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
