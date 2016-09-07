@@ -48,16 +48,18 @@ public class InvokeAssessmentCommand extends ApiCommand {
 			throw new IllegalArgumentException("The mandatory argument host is not given.");
 		}
 
-		String host = ConsoleUtilities.listValueMatchRegex(arguments, "host=(.+)");
-
 		JSONObject json = null;
-		Api api = new Api();
-		Map<String, String> postParameters = new HashMap<String, String>();
-		postParameters.put("rescan", arguments.contains("rescan") ? "true" : "false");
-		postParameters.put("hidden", arguments.contains("hidden") ? "true" : "false");
-
 		try {
-			json = new JSONObject(api.sendApiPostRequest(getApiCommand() + "?host=" + host, postParameters));
+			Api api = new Api();
+			
+			Map<String, String> postParameters = new HashMap<String, String>();
+			postParameters.put("rescan", arguments.contains("rescan") ? "true" : "false");
+			postParameters.put("hidden", arguments.contains("hidden") ? "true" : "false");
+			
+			String host = ConsoleUtilities.listValueMatchRegex(arguments, "host=(.+)");
+			final String commandUrl = getApiCommand() + "?host=" + host;
+
+			json = new JSONObject(api.sendApiPostRequest(commandUrl, postParameters));
 			checkForError(json);
 		} catch (JSONException e) {
 			Logger.getGlobal().severe("Could not build result: " + e.getLocalizedMessage());

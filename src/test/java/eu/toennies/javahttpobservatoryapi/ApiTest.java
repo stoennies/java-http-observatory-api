@@ -44,7 +44,7 @@ public class ApiTest {
 	public void testGradeDistributionCommand() {
 		GradeDistributionCommand cmd = new GradeDistributionCommand();
 		JSONObject gradeDistribution = cmd.run(null);
-		
+
 		assertNotNull("JSONObject is null", gradeDistribution);
 		ApiAssert.assertApiDataFetched(gradeDistribution);
 	}
@@ -70,24 +70,21 @@ public class ApiTest {
 	@Test
 	public void testInvokeAssessmentCommand() {
 		InvokeAssessmentCommand cmd = new InvokeAssessmentCommand();
-		
+
 		JSONObject assessment = new JSONObject();
 		try {
 			// Argument host is mandatory. Should fail
 			assessment = cmd.run(null);
-			fail("InvokeAssessmentCommand called without an host argument. This should not be possible.");
-		} catch(IllegalArgumentException e) {
-			//ignore
-		}
-		
-		
-		List<String> arguments = new ArrayList<String>();
-		arguments.add("host=google.com");
-		arguments.add("hidden");
-		assessment = cmd.run(arguments);
+			fail("Should have raised an IllegalArgumentException.");
+		} catch (IllegalArgumentException e) {
+			List<String> arguments = new ArrayList<String>();
+			arguments.add("host=google.com");
+			arguments.add("hidden");
+			assessment = cmd.run(arguments);
 
-		assertNotNull("JSONObject is null", assessment);
-		ApiAssert.assertApiDataFetched(assessment);
+			assertNotNull("JSONObject is null", assessment);
+			ApiAssert.assertApiDataFetched(assessment);
+		}
 	}
 
 	/**
@@ -110,12 +107,12 @@ public class ApiTest {
 		try {
 			// Argument id is mandatory. Should fail
 			cmd.run(null);
-		} catch(IllegalArgumentException e) {
-			assertTrue(true);
+			fail("Should have raised an IllegalArgumentException.");
+		} catch (IllegalArgumentException e) {
+			return;
 		}
 	}
 
-	
 	/**
 	 * A recent scan call should not be null.
 	 */
@@ -126,36 +123,38 @@ public class ApiTest {
 		JSONObject json = cmd.run(null);
 		assertNotNull("JSONObject is null", json);
 		ApiAssert.assertApiDataFetched(json);
-		
+
 		// Test the min argument
 		List<String> arguments = new ArrayList<String>();
 		arguments.add("min=100");
 		json = cmd.run(arguments);
 		String key;
-		for(Iterator<String> it = json.keys(); it.hasNext();) {
+		for (Iterator<String> it = json.keys(); it.hasNext();) {
 			key = it.next();
 			try {
-				assertTrue("Calling recent scan with a minimum score of 100 should only retrieve A+ score", json.get(key).equals("A+"));
+				assertTrue("Calling recent scan with a minimum score of 100 should only retrieve A+ score",
+						json.get(key).equals("A+"));
 			} catch (JSONException e) {
-				e.printStackTrace();
+				fail();
 			}
 		}
-		
+
 		arguments.clear();
 		arguments.add("max=80");
 		json = cmd.run(arguments);
-		key = new String();
-		for(Iterator<String> it = json.keys(); it.hasNext();) {
+		for (Iterator<String> it = json.keys(); it.hasNext();) {
 			try {
 				key = it.next();
-				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores", json.get(key).equals("A-"));
-				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores", json.get(key).equals("A"));
-				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores", json.get(key).equals("A+"));
+				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores",
+						json.get(key).equals("A-"));
+				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores",
+						json.get(key).equals("A"));
+				assertFalse("Calling recent scan with a maximum score of 80 should only retrieve A scores",
+						json.get(key).equals("A+"));
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
 		}
-		
 
 	}
 }

@@ -306,7 +306,7 @@ public class HelpFormatter {
 	 *
 	 * @return the StringBuffer with the rendered Options contents.
 	 */
-	protected StringBuffer renderWrappedText(StringBuffer sb, int width, int nextLineTabStop, String text) {
+	protected StringBuffer renderWrappedText(StringBuffer sb, int width, final int nextLineTabStop, String text) {
 		int pos = findWrapPos(text, width, 0);
 
 		if (pos == -1) {
@@ -316,14 +316,17 @@ public class HelpFormatter {
 		}
 		sb.append(rtrim(text.substring(0, pos))).append(getNewLine());
 
+		int currentNextLineTabStop;
 		if (nextLineTabStop >= width) {
 			// stops infinite loop happening
-			nextLineTabStop = 1;
+			currentNextLineTabStop = 1;
+		} else {
+			currentNextLineTabStop = nextLineTabStop;
 		}
 
 		// all following lines must be padded with nextLineTabStop space
 		// characters
-		final String padding = createPadding(nextLineTabStop);
+		final String padding = createPadding(currentNextLineTabStop);
 
 		while (true) {
 			text = padding + text.substring(pos).trim();
@@ -335,7 +338,7 @@ public class HelpFormatter {
 				return sb;
 			}
 
-			if (text.length() > width && pos == nextLineTabStop - 1) {
+			if (text.length() > width && pos == currentNextLineTabStop - 1) {
 				pos = width;
 			}
 

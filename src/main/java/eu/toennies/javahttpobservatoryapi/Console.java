@@ -105,7 +105,7 @@ public class Console {
 				}
 			}
 		} catch (UnsupportedEncodingException e) {
-
+			System.err.println("Could not write to System.out using UTF-8 encoding.");
 		} finally {
 			if (pw != null) {
 				pw.close();
