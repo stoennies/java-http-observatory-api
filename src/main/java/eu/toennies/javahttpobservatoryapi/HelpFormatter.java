@@ -306,7 +306,7 @@ public class HelpFormatter {
 	 *
 	 * @return the StringBuffer with the rendered Options contents.
 	 */
-	protected StringBuffer renderWrappedText(StringBuffer sb, int width, final int nextLineTabStop, String text) {
+	protected StringBuffer renderWrappedText(final StringBuffer sb, final int width, final int nextLineTabStop, final String text) {
 		int pos = findWrapPos(text, width, 0);
 
 		if (pos == -1) {
@@ -328,21 +328,22 @@ public class HelpFormatter {
 		// characters
 		final String padding = createPadding(currentNextLineTabStop);
 
+		String newText = text;
 		while (true) {
-			text = padding + text.substring(pos).trim();
-			pos = findWrapPos(text, width, 0);
+			newText = padding + newText.substring(pos).trim();
+			pos = findWrapPos(newText, width, 0);
 
 			if (pos == -1) {
-				sb.append(text);
+				sb.append(newText);
 
 				return sb;
 			}
 
-			if (text.length() > width && pos == currentNextLineTabStop - 1) {
+			if (newText.length() > width && pos == currentNextLineTabStop - 1) {
 				pos = width;
 			}
 
-			sb.append(rtrim(text.substring(0, pos))).append(getNewLine());
+			sb.append(rtrim(newText.substring(0, pos))).append(getNewLine());
 		}
 	}
 
@@ -529,9 +530,10 @@ public class HelpFormatter {
 		int max = 0;
 
 		List<StringBuffer> prefixList = new ArrayList<StringBuffer>();
+		StringBuffer optBuf;
 		for (ApiCommands cmds : commands) {
 			ApiCommand command = cmds.getCommand();
-			StringBuffer optBuf = new StringBuffer();
+			optBuf = new StringBuffer();
 
 			optBuf.append(lpad).append(command.getConsoleShortCommand());
 			optBuf.append(", ").append(command.getConsoleCommand());
@@ -546,9 +548,10 @@ public class HelpFormatter {
 
 		int x = 0;
 
+		StringBuilder opt2Buf;
 		for (Iterator<ApiCommands> it = Arrays.asList(commands).iterator(); it.hasNext();) {
 			ApiCommands option = it.next();
-			StringBuilder opt2Buf = new StringBuilder(prefixList.get(x++).toString());
+			opt2Buf = new StringBuilder(prefixList.get(x++).toString());
 
 			if (opt2Buf.length() < max) {
 				opt2Buf.append(createPadding(max - opt2Buf.length()));
