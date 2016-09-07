@@ -118,4 +118,24 @@ public class ConsoleUtilities
 		return null;
 	}
 
+	public static String listValueMatchRegex(List<String> arguments, String regex) {
+		Pattern p = Pattern.compile(regex);
+		
+		for(String arg : arguments)
+		{
+			Matcher m = p.matcher(arg);
+			
+			while(m.find())
+			{
+				if(m.groupCount() == 0) {
+					return m.group();
+				} else if(m.groupCount() == 1) {
+					return m.group(1);
+				}
+ 			}
+		}
+		
+		return null;
+	}
+
 }
